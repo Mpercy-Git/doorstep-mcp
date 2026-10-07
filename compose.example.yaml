@@ -2,7 +2,8 @@
 # and so go2rtc can fetch clips from doorstep:8765. Never publish 1984 to the internet.
 services:
   doorstep:
-    build: .
+    image: ghcr.io/mpercy-git/doorstep-mcp:latest   # or pin a version, e.g. :0.1.0
+    # build: .                                     # build from this checkout instead
     container_name: doorstep
     restart: unless-stopped
     volumes:

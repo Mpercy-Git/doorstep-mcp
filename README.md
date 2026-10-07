@@ -57,7 +57,8 @@ The prompt `answer_the_door` contains the guardrails plus the house rules.
 
    Secrets are refused if they appear in the YAML file.
 3. Set the network name in `compose.example.yaml` to Frigate's network, then
-   `docker compose -f compose.example.yaml up -d --build`.
+   `docker compose -f compose.example.yaml up -d`. This pulls `ghcr.io/mpercy-git/doorstep-mcp`
+   (amd64 and arm64). To build from your checkout instead, swap `image:` for `build: .`.
 4. Run `docker exec doorstep doorstep check`, which checks the Frigate snapshot, the go2rtc two-way
    stream, RTSP audio, the ElevenLabs key and the house rules file.
 
@@ -192,6 +193,10 @@ Your responsibility:
   `stt.provider: openai_compatible` and point `stt.base_url` at a local Whisper server.
 
 ## Development
+
+Images are built by `.github/workflows/docker.yml`. Every pull request builds and smoke-tests the
+image without pushing it. Merges to `main` publish `latest` and `sha-<commit>`, and tags such as
+`v0.1.0` publish `0.1.0` and `0.1`.
 
 ```sh
 uv venv && uv pip install -e ".[dev]"

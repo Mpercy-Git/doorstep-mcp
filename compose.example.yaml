@@ -1,0 +1,29 @@
+# Joins Frigate's Docker network so it can reach frigate:5000, :8554 and :1984,
+# and so go2rtc can fetch clips from doorstep:8765. Never publish 1984 to the internet.
+services:
+  doorstep:
+    build: .
+    container_name: doorstep
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/config/config.yaml:ro
+      - ./house-rules.md:/config/house-rules.md:ro
+      - doorstep-data:/data
+    environment:
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY}
+      DOORSTEP_MCP_TOKEN: ${DOORSTEP_MCP_TOKEN}
+      DOORSTEP_RING_TOKEN: ${DOORSTEP_RING_TOKEN}
+      FRONA_TRIGGER_TOKEN: ${FRONA_TRIGGER_TOKEN}
+      # FRIGATE_TOKEN: ${FRIGATE_TOKEN}   # only when going through port 8971
+      # MQTT_PASSWORD: ${MQTT_PASSWORD}
+    networks: [frigate]
+    # Expose only to the LAN for Home Assistant's rest_command, if HA isn't on this network:
+    # ports: ["192.168.1.10:8765:8765"]
+
+networks:
+  frigate:
+    external: true
+    name: frigate_default   # the network Frigate's compose project created
+
+volumes:
+  doorstep-data:

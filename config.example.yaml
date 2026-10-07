@@ -1,0 +1,69 @@
+# Doorstep configuration. Secrets never go here: see the environment variables in README.md.
+camera: FrontDoorbell                # Frigate camera / go2rtc stream for video+audio in
+twoway_stream: FrontDoorbell_twoway  # go2rtc stream for audio out
+frigate:
+  api_url: http://frigate:5000       # inside the Docker network: no auth. Via 8971 set FRIGATE_TOKEN.
+  rtsp_url: rtsp://frigate:8554/FrontDoorbell
+  go2rtc_url: http://frigate:1984
+public_clip_base: http://doorstep:8765   # how go2rtc reaches Doorstep
+listen_port: 8765
+data_dir: /data
+house_rules_path: /config/house-rules.md
+retention_days: 30                   # transcripts and summaries
+
+tts:
+  voice_id: <British voice id>
+  model_id: eleven_flash_v2_5        # or eleven_multilingual_v2 for quality over speed
+  allowed_voices: []                 # extra voices door_say may pick; voice_id is always allowed
+  # voice_settings: {stability: 0.5, similarity_boost: 0.75}
+
+stt:
+  provider: elevenlabs               # or openai_compatible (e.g. a local Whisper server)
+  model_id: scribe_v1                # for openai_compatible: the model name, e.g. whisper-1
+  # language_code: en
+  # base_url: http://whisper:8000/v1 # openai_compatible only
+
+session:
+  idle_timeout_s: 180
+  agent_timeout_s: 8
+  allow_unprompted_speech: false
+  greet_on_ring: true
+  ring_merge_s: 20
+
+limits:
+  max_chars: 300
+  lines_per_minute: 12
+  quiet_hours: "22:30-07:00"          # no unprompted speech in these hours
+  timezone: Europe/London
+
+phrases:
+  disclosure: "Hi, you're speaking to an automated assistant."
+  greeting: "One moment please."
+  fallback: "Thanks for ringing. Please leave any parcels in the porch box."
+  preload: ["Thanks, please leave it in the porch box.", "They can't come to the door right now."]
+
+audio:                               # tune on site; see README
+  echo_guard_ms: 600
+  end_silence_ms: 1200
+  vad_threshold: 0.5
+  playback_tail_ms: 400
+
+relay:
+  frona:
+    url: http://frona:3001
+    agent_id: <front door agent id>  # authenticates with FRONA_TRIGGER_TOKEN
+    snapshot_max_height: 720         # sent with the trigger
+  # webhook_url: http://n8n:5678/webhook/doorbell     # same payload as the Frona trigger
+  # after_webhook_url: http://n8n:5678/webhook/door-closed
+  # mqtt_topic: doorstep/ring
+
+# mqtt:                              # needed for mqtt_topic and the approach hint
+#   host: mosquitto
+#   port: 1883
+#   username: doorstep               # password from MQTT_PASSWORD
+#   frigate_events_topic: frigate/events
+
+approach:                            # Frigate person in the porch zone warms things up
+  enabled: false
+  zone: porch
+  open_session_on_approach: false    # leave off until porch false positives are known to be rare
